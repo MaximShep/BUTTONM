@@ -1,2 +1,4 @@
+meta:
+  environment: docker
 run:
   containerPort: 3000
