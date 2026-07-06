@@ -29,7 +29,7 @@ ENV HF_HOME=/data/huggingface
 ENV LOCAL_WHISPER_PYTHON=/opt/venv/bin/python
 
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends ffmpeg python3 python3-venv python3-pip ca-certificates \
+  && apt-get install -y --no-install-recommends ffmpeg python3 python3-venv python3-pip ca-certificates openssl \
   && python3 -m venv /opt/venv \
   && /opt/venv/bin/pip install --no-cache-dir --upgrade pip \
   && rm -rf /var/lib/apt/lists/*
