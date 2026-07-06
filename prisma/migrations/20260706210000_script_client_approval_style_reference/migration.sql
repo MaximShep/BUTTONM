@@ -1,0 +1,2 @@
+ALTER TABLE "Script" ADD COLUMN "approvedByClientAt" DATETIME;
+ALTER TABLE "Script" ADD COLUMN "isStyleReference" BOOLEAN NOT NULL DEFAULT false;

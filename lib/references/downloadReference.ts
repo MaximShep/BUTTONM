@@ -1,0 +1,64 @@
+import "server-only";
+
+import { mkdir } from "fs/promises";
+import { execFile } from "child_process";
+import { promisify } from "util";
+import path from "path";
+import { referenceVideoPath } from "@/lib/references/paths";
+import { detectReferenceType, isLinkReferenceType } from "@/lib/references/types";
+
+const execFileAsync = promisify(execFile);
+
+const downloadFallbackMessage =
+  "Автоматическое скачивание не сработало. Загрузите видеофайл, вставьте расшифровку вручную, проверьте ссылку или настройте yt-dlp/ffmpeg.";
+const instagramFallbackMessage =
+  "Instagram может ограничивать скачивание. Загрузите видео вручную, вставьте расшифровку, проверьте ссылку или настройте yt-dlp/ffmpeg.";
+
+function errorMessage(error: unknown, type: string) {
+  if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
+    return `yt-dlp не установлен. ${downloadFallbackMessage}`;
+  }
+
+  const message = error instanceof Error ? error.message : String(error);
+  if (type === "instagram") {
+    return `${instagramFallbackMessage}${message ? ` Детали: ${message}` : ""}`;
+  }
+
+  return `${downloadFallbackMessage}${message ? ` Детали: ${message}` : ""}`;
+}
+
+async function runYtDlp(args: string[]) {
+  try {
+    await execFileAsync("yt-dlp", args, { maxBuffer: 1024 * 1024 * 20 });
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
+      await execFileAsync(process.env.LOCAL_WHISPER_PYTHON || "python3", ["-m", "yt_dlp", ...args], {
+        maxBuffer: 1024 * 1024 * 20,
+      });
+      return;
+    }
+
+    throw error;
+  }
+}
+
+export async function downloadReferenceVideo(input: {
+  projectId: string;
+  referenceId: string;
+  url: string;
+}) {
+  const type = detectReferenceType(input.url);
+  if (!isLinkReferenceType(type)) {
+    throw new Error("Поддерживаются только YouTube, TikTok и Instagram Reels ссылки.");
+  }
+
+  const outputPath = referenceVideoPath(input.projectId, input.referenceId);
+  await mkdir(path.dirname(outputPath), { recursive: true });
+
+  try {
+    await runYtDlp(["-f", "mp4/best", "-o", outputPath, input.url]);
+    return outputPath;
+  } catch (error) {
+    throw new Error(errorMessage(error, type));
+  }
+}

@@ -1,0 +1,183 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  login         String         @unique
+  passwordHash  String
+  createdAt     DateTime       @default(now())
+  projects      Project[]
+  styleRules    StyleRule[]
+  styleExamples StyleExample[]
+  styleLearnings StyleLearning[]
+}
+
+model Project {
+  id            String         @id @default(cuid())
+  userId        String
+  title         String
+  brand         String
+  briefText     String
+  briefFileName String?
+  generationComment String?
+  status        String         @default("draft")
+  currentStep   String         @default("questions")
+  referenceScriptsCount Int    @default(0)
+  scriptsCount  Int            @default(5)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scripts       Script[]
+  questions     ProjectQuestion[]
+  llmLogs       LLMLog[]
+  events        ProjectEvent[]
+  references    ProjectReference[]
+
+  @@index([userId])
+}
+
+model ProjectReference {
+  id                    String   @id @default(cuid())
+  projectId             String
+  type                  String
+  url                   String?
+  fileName              String?
+  localFilePath         String?
+  transcriptText        String?
+  extractedScenarioText String?
+  notes                 String?
+  useInGeneration       Boolean  @default(true)
+  status                String   @default("added")
+  error                 String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  project               Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+model ProjectQuestion {
+  id         String   @id @default(cuid())
+  projectId  String
+  question   String
+  answer     String?
+  importance String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+model Script {
+  id            String   @id @default(cuid())
+  projectId     String
+  number        Int
+  title         String
+  format        String
+  generatedText String
+  editedText    String?
+  basedOnReference Boolean @default(false)
+  referenceReason String?
+  status        String   @default("draft")
+  approvedByClientAt DateTime?
+  isStyleReference Boolean @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  revisions     ScriptRevision[]
+  styleLearnings StyleLearning[]
+
+  @@unique([projectId, number])
+  @@index([projectId])
+}
+
+model ScriptRevision {
+  id           String   @id @default(cuid())
+  scriptId     String
+  previousText String
+  newText      String
+  changeNote   String?
+  createdAt    DateTime @default(now())
+  script       Script   @relation(fields: [scriptId], references: [id], onDelete: Cascade)
+
+  @@index([scriptId])
+}
+
+model StyleRule {
+  id        String   @id @default(cuid())
+  userId    String
+  rule      String
+  source    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model StyleExample {
+  id               String   @id @default(cuid())
+  userId           String
+  title            String
+  briefText        String
+  briefFileName    String?
+  scriptsText      String
+  finalScriptsText String   @default("")
+  scriptsFileName  String?
+  comment          String   @default("")
+  active           Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model StyleLearning {
+  id                   String   @id @default(cuid())
+  userId               String
+  scriptId             String
+  summary              String
+  badPatternsJson      String
+  goodPatternsJson     String
+  phrasesToAvoidJson   String
+  phrasesToPreferJson  String
+  createdAt            DateTime @default(now())
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  script               Script   @relation(fields: [scriptId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([scriptId])
+}
+
+model LLMLog {
+  id        String   @id @default(cuid())
+  projectId String
+  provider  String
+  model     String
+  task      String
+  prompt    String
+  response  String?
+  error     String?
+  createdAt DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+model ProjectEvent {
+  id          String   @id @default(cuid())
+  projectId   String
+  type        String
+  payloadJson String
+  createdAt   DateTime @default(now())
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
