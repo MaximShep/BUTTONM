@@ -7,6 +7,8 @@ export DATABASE_URL="${DATABASE_URL:-file:/data/dev.db}"
 export REFERENCE_DATA_DIR="${REFERENCE_DATA_DIR:-/data/references}"
 export HF_HOME="${HF_HOME:-/data/huggingface}"
 export LOCAL_WHISPER_PYTHON="${LOCAL_WHISPER_PYTHON:-/opt/venv/bin/python}"
+export YT_DLP_PYTHON="${YT_DLP_PYTHON:-$LOCAL_WHISPER_PYTHON}"
+export PATH="/opt/venv/bin:$PATH"
 
 rm -rf node_modules/.prisma/client
 

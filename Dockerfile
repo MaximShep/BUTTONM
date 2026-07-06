@@ -29,6 +29,8 @@ ENV DATABASE_URL=file:/data/dev.db
 ENV REFERENCE_DATA_DIR=/data/references
 ENV HF_HOME=/data/huggingface
 ENV LOCAL_WHISPER_PYTHON=/opt/venv/bin/python
+ENV YT_DLP_PYTHON=/opt/venv/bin/python
+ENV PATH=/opt/venv/bin:$PATH
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends ffmpeg python3 python3-venv python3-pip ca-certificates openssl \

@@ -32,7 +32,7 @@ async function runYtDlp(args: string[]) {
     await execFileAsync("yt-dlp", args, { maxBuffer: 1024 * 1024 * 20 });
   } catch (error) {
     if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
-      await execFileAsync(process.env.LOCAL_WHISPER_PYTHON || "python3", ["-m", "yt_dlp", ...args], {
+      await execFileAsync(process.env.YT_DLP_PYTHON || process.env.LOCAL_WHISPER_PYTHON || "python3", ["-m", "yt_dlp", ...args], {
         maxBuffer: 1024 * 1024 * 20,
       });
       return;
