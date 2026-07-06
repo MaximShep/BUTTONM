@@ -1,0 +1,14 @@
+.git
+.next
+node_modules
+data/references
+uploads
+prisma/dev.db
+prisma/dev.db-journal
+tsconfig.tsbuildinfo
+.env
+.env.*
+npm-debug.log*
+Dockerfile
+README*.md
+docs

@@ -53,6 +53,34 @@ npm run dev
 
 Не запускайте `npm run build`, пока работает `npm run dev`: оба процесса используют `.next`, и dev-сервер может начать искать уже удаленные chunks. Если это случилось, остановите dev-сервер, удалите `.next` и запустите `npm run dev` заново.
 
+## Деплой на Amvera
+
+Проект подготовлен к Docker-деплою на Amvera:
+
+- `Dockerfile` собирает Next.js, ставит `ffmpeg`, Python-зависимости из `requirements.txt` и запускает приложение на `3000`.
+- `amvera.yaml` указывает `containerPort: 3000` и монтирует постоянное хранилище в `/data`.
+- `docker-entrypoint.sh` перед стартом создает runtime-папки, применяет `prisma migrate deploy` и запускает seed.
+
+В переменных Amvera задайте:
+
+```env
+DATABASE_URL=file:/data/dev.db
+AUTH_SECRET=<long-random-secret>
+SEED_LOGIN=blogger
+SEED_PASSWORD=<strong-password>
+LLM_PROVIDER=<groq|openrouter|deepseek|mock>
+GROQ_API_KEY=
+OPENROUTER_API_KEY=
+DEEPSEEK_API_KEY=
+TRANSCRIPTION_PROVIDER=local
+LOCAL_WHISPER_MODEL=small
+LOCAL_WHISPER_LANGUAGE=ru
+REFERENCE_DATA_DIR=/data/references
+HF_HOME=/data/huggingface
+```
+
+`DATABASE_URL`, `REFERENCE_DATA_DIR` и `HF_HOME` должны указывать в `/data`, иначе SQLite, загруженные референсы и кеш Whisper-моделей могут потеряться при пересборке контейнера.
+
 ## Готовый пользовательский поток
 
 1. Войти на `/login`.

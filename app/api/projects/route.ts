@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { extractPdfText } from "@/lib/files/extractPdfText";
 import { prisma } from "@/lib/prisma";
 import { analyzeBriefQuestionsAndReplace } from "@/lib/projects/briefQuestions";
+import { referenceVideoPath } from "@/lib/references/paths";
 import { detectReferenceType, isProjectReferenceType } from "@/lib/references/types";
 import { generationErrorMessage } from "@/lib/userMessages";
 
@@ -123,7 +124,6 @@ export async function POST(request: NextRequest) {
   });
 
   const referenceIds = parseReferenceIds(formData.get("referenceIds"));
-  const referenceDirectory = path.join(process.cwd(), "uploads", "project-references", project.id);
   const referencesToCreate = [];
 
   for (const referenceId of referenceIds) {
@@ -139,9 +139,9 @@ export async function POST(request: NextRequest) {
     let localFilePath: string | null = null;
 
     if (file instanceof File && file.size > 0) {
-      await mkdir(referenceDirectory, { recursive: true });
       fileName = safeFileName(file.name);
-      localFilePath = path.join(referenceDirectory, `${referenceId}-${fileName}`);
+      localFilePath = referenceVideoPath(project.id, referenceId);
+      await mkdir(path.dirname(localFilePath), { recursive: true });
       await writeFile(localFilePath, Buffer.from(await file.arrayBuffer()));
     }
 
