@@ -3,7 +3,16 @@ import "server-only";
 import path from "path";
 
 function referenceDataRoot() {
-  if (process.env.REFERENCE_DATA_DIR) return process.env.REFERENCE_DATA_DIR;
+  if (process.env.REFERENCE_DATA_DIR) {
+    if (path.isAbsolute(process.env.REFERENCE_DATA_DIR)) return process.env.REFERENCE_DATA_DIR;
+    if (process.env.NODE_ENV === "production") {
+      const relativePath = process.env.REFERENCE_DATA_DIR.replace(/^data[\/\\]?/, "");
+      return path.join("/data", relativePath);
+    }
+
+    return path.join(process.cwd(), process.env.REFERENCE_DATA_DIR);
+  }
+
   if (process.env.NODE_ENV === "production") return "/data/references";
 
   return path.join(process.cwd(), "data", "references");

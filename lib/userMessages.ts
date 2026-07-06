@@ -32,6 +32,8 @@ export function generationErrorMessage(error: unknown) {
 export function referenceErrorMessage(error: unknown) {
   const message = error instanceof Error ? error.message : String(error || "");
 
+  if (message.includes(videoHelp)) return message;
+
   if (hasAny(message, ["yt-dlp", "ffmpeg", "download", "скачив", "аудио", "расшиф", "transcrib", "video"])) {
     return `${message} ${videoHelp}`;
   }

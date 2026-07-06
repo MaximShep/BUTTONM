@@ -8,7 +8,14 @@ export REFERENCE_DATA_DIR="${REFERENCE_DATA_DIR:-/data/references}"
 export HF_HOME="${HF_HOME:-/data/huggingface}"
 export LOCAL_WHISPER_PYTHON="${LOCAL_WHISPER_PYTHON:-/opt/venv/bin/python}"
 export YT_DLP_PYTHON="${YT_DLP_PYTHON:-$LOCAL_WHISPER_PYTHON}"
+export YT_DLP_SLEEP_REQUESTS="${YT_DLP_SLEEP_REQUESTS:-3}"
 export PATH="/opt/venv/bin:$PATH"
+
+case "$REFERENCE_DATA_DIR" in
+  /*) ;;
+  data/references) export REFERENCE_DATA_DIR="/data/references" ;;
+  data/references/*) export REFERENCE_DATA_DIR="/${REFERENCE_DATA_DIR}" ;;
+esac
 
 rm -rf node_modules/.prisma/client
 

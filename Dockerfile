@@ -30,6 +30,7 @@ ENV REFERENCE_DATA_DIR=/data/references
 ENV HF_HOME=/data/huggingface
 ENV LOCAL_WHISPER_PYTHON=/opt/venv/bin/python
 ENV YT_DLP_PYTHON=/opt/venv/bin/python
+ENV YT_DLP_SLEEP_REQUESTS=3
 ENV PATH=/opt/venv/bin:$PATH
 
 RUN apt-get update \
