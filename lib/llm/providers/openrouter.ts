@@ -1,5 +1,6 @@
 import "server-only";
 
+import { appBaseUrl } from "@/lib/appUrl";
 import type { LLMProvider } from "@/lib/llm/types";
 
 const endpoint = "https://openrouter.ai/api/v1/chat/completions";
@@ -21,7 +22,7 @@ export const openRouterProvider: LLMProvider = {
       headers: {
         Authorization: `Bearer ${key}`,
         "Content-Type": "application/json",
-        "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+        "HTTP-Referer": appBaseUrl(),
         "X-Title": "UGC Scripts MVP",
       },
       body: JSON.stringify({

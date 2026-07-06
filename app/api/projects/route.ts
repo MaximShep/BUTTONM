@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
+import { appUrl } from "@/lib/appUrl";
 import { getCurrentUser } from "@/lib/auth";
 import { extractPdfText } from "@/lib/files/extractPdfText";
 import { prisma } from "@/lib/prisma";
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest) {
   const user = await getCurrentUser();
 
   if (!user) {
-    return NextResponse.redirect(new URL("/login", request.url), 303);
+    return NextResponse.redirect(appUrl("/login", request.url), 303);
   }
 
   const formData = await request.formData();
@@ -55,19 +56,19 @@ export async function POST(request: NextRequest) {
 
   if (briefFile instanceof File && briefFile.size > 0) {
     if (briefFile.type && briefFile.type !== "application/pdf") {
-      return NextResponse.redirect(new URL("/projects/new?error=pdf_type", request.url), 303);
+      return NextResponse.redirect(appUrl("/projects/new?error=pdf_type", request.url), 303);
     }
 
     try {
       briefText = await extractPdfText(await briefFile.arrayBuffer());
       briefFileName = briefFile.name;
     } catch {
-      return NextResponse.redirect(new URL("/projects/new?error=pdf_read", request.url), 303);
+      return NextResponse.redirect(appUrl("/projects/new?error=pdf_read", request.url), 303);
     }
   }
 
   if (!title || !brand || !briefText) {
-    return NextResponse.redirect(new URL("/projects/new?error=required", request.url), 303);
+    return NextResponse.redirect(appUrl("/projects/new?error=required", request.url), 303);
   }
 
   const duplicateWindow = new Date(Date.now() - 15 * 60 * 1000);
@@ -99,7 +100,7 @@ export async function POST(request: NextRequest) {
   });
 
   if (duplicateProject) {
-    return NextResponse.redirect(new URL(`/projects/${duplicateProject.id}`, request.url), 303);
+    return NextResponse.redirect(appUrl(`/projects/${duplicateProject.id}`, request.url), 303);
   }
 
   const project = await prisma.project.create({
@@ -185,5 +186,5 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  return NextResponse.redirect(new URL(`/projects/${project.id}`, request.url), 303);
+  return NextResponse.redirect(appUrl(`/projects/${project.id}`, request.url), 303);
 }

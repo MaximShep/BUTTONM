@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { appUrl } from "@/lib/appUrl";
 import { getCurrentUser } from "@/lib/auth";
 import { extractPdfText } from "@/lib/files/extractPdfText";
 import { prisma } from "@/lib/prisma";
@@ -17,7 +18,7 @@ export async function POST(request: NextRequest) {
   const user = await getCurrentUser();
 
   if (!user) {
-    return NextResponse.redirect(new URL("/login", request.url), 303);
+    return NextResponse.redirect(appUrl("/login", request.url), 303);
   }
 
   const formData = await request.formData();
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
       briefText = (await readUploadedText(briefFile)).trim();
       briefFileName = briefFile.name;
     } catch {
-      return NextResponse.redirect(new URL("/settings/style?error=example_read", request.url), 303);
+      return NextResponse.redirect(appUrl("/settings/style?error=example_read", request.url), 303);
     }
   }
 
@@ -47,20 +48,20 @@ export async function POST(request: NextRequest) {
       finalScriptsText = (await readUploadedText(scriptsFile)).trim();
       scriptsFileName = scriptsFile.name;
     } catch {
-      return NextResponse.redirect(new URL("/settings/style?error=example_read", request.url), 303);
+      return NextResponse.redirect(appUrl("/settings/style?error=example_read", request.url), 303);
     }
   }
 
   if (!title) {
-    return NextResponse.redirect(new URL("/settings/style?error=case_title_required", request.url), 303);
+    return NextResponse.redirect(appUrl("/settings/style?error=case_title_required", request.url), 303);
   }
 
   if (!briefText) {
-    return NextResponse.redirect(new URL("/settings/style?error=brief_required", request.url), 303);
+    return NextResponse.redirect(appUrl("/settings/style?error=brief_required", request.url), 303);
   }
 
   if (!finalScriptsText) {
-    return NextResponse.redirect(new URL("/settings/style?error=example_required", request.url), 303);
+    return NextResponse.redirect(appUrl("/settings/style?error=example_required", request.url), 303);
   }
 
   await prisma.styleExample.create({
@@ -77,5 +78,5 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  return NextResponse.redirect(new URL("/settings/style", request.url), 303);
+  return NextResponse.redirect(appUrl("/settings/style", request.url), 303);
 }
